@@ -20,7 +20,7 @@ import mixbox.idgen
 import requests
 from maec.misc.exceptions import APIKeyException, LookupNotFoundException
 
-API_KEY = None
+API_KEY = "7a11ef9031accd2ab410aae42525bcfc0d6b6014eea91920a0481dfbc2be4648"
 
 
 def file_to_md5(path, blocksize=65536):
@@ -52,7 +52,7 @@ def vt_report_from_md5(input_md5, api_key=None, proxies=None):
     if type(input_md5) == list:
         input_md5 = ",".join(input_md5)
 
-    parameters = {"resource": input_md5, "apikey": api_key}
+    parameters = {"resource": input_md5, "apikey": api_key, 'allinfo': '1'}
 
     response = requests.get("http://www.virustotal.com/vtapi/v2/file/report",
                             params=parameters,
@@ -111,13 +111,29 @@ def vt_report_to_maec_package(vt_report_input):
                 "id": mixbox.idgen.create_id(prefix="malware-instance-").split(":")[1],
                 "instance_object_refs": [instance_object_ref],
                 "analysis_metadata": [
-                    {
-                        "is_automated": True,
-                        "analysis_type": "static",
-                        "description": "Created by VirusTotal to MAEC (http://github.com/MAECProject/vt-to-maec)"
-                    }
+
                 ]
             })
+
+        # add malware instance to package
+        """info_obj = package["additional_info"][instance_object_ref]["exiftool"] = {}
+        info_obj = package["additional_info"]["exiftool"] = {}
+        info_obj["exiftool"] = {
+                "SubsystemVersion": vt_report["SubsystemVersion"],
+                "LanguageCode": vt_report["LanguageCode"],
+                "ProductName": vt_report["ProductName"],
+                "InternalName": vt_report["InternalName"],
+                "ImageFileCharacteristics": vt_report["ImageFileCharacteristics"],
+                "MIMEType": vt_report["MIMEType"],
+                "Subsystem": vt_report["Subsystem"],
+                "FileType": vt_report["FileType"],
+                "PEType": vt_report["PEType"],
+                "FileFlagsMask": vt_report["FileFlagsMask"],
+                "FileOS": vt_report["FileOS"],
+                "ObjectFileType": vt_report["ObjectFileType"],
+
+            }
+        """
 
         # create cyber observable object dictionary - all AV classifications are nested under here
         obsv_obj = package["observable_objects"][instance_object_ref] = {}
@@ -135,17 +151,44 @@ def vt_report_to_maec_package(vt_report_input):
         maec_av = package["observable_objects"][instance_object_ref]["extensions"]["x-maec-avclass"]
 
         # iterate through all ofg VT results, add classifications to cyber observable object
-        for k, v in vt_report["scans"].iteritems():
+        for k, v in vt_report["scans"].items():
             tmp = {}
-            tmp["classification_name"] = v["result"]
-            tmp["scan_date"] = vt_report["scan_date"]
-            tmp["is_detected"] = v["detected"]
-            tmp["av_name"] = k
-            tmp["av_vendor"] = k
-            tmp["av_engine_version"] = v["version"]
-            tmp["av_definition_version"] = v["update"]
+            tmp["process"] = vt_report["additional_info"]
+            #   tmp["network"] = vt_report["additional_info"]
+            #    tmp["registry"] = vt_report["additional_info"]
+            # tmp["classification_name"] = v["result"]
+            # tmp["scan_date"] = vt_report["scan_date"]
+            # tmp["is_detected"] = v["detected"]
+            # tmp["av_name"] = k
+            # tmp["av_vendor"] = k
+            # tmp["av_engine_version"] = v["version"]
+            # tmp["av_definition_version"] = v["update"]
 
             maec_av.append(tmp)
+        #
+        # #testing object start
+        # #maec_av.append(vt_report["additional_info"]["behaviour-v1"]["network"])
+        # for k, v in vt_report["scans"].items():
+        #     tmp = {}
+        #
+        #     tmp["behaviour"] = vt_report["additional_info"]["behaviour-v1"]
+        #     tmp["classification_name"] = v["result"]
+        #     tmp["scan_date"] = vt_report["scan_date"]
+        #     tmp["is_detected"] = v["detected"]
+        #     tmp["av_name"] = k
+        #     tmp["av_vendor"] = k
+        #     tmp["av_engine_version"] = v["version"]
+        #     tmp["av_definition_version"] = v["update"]
+        #
+        #     maec_av.append(tmp)
+        # # for k, v in vt_report["additional_info"].items():
+        # #     tmp1 = {}
+        # #     tmp1["exiftool"] = v["exiftool"]
+        # #
+        # #     maec_av.append(tmp1)
+        #
+        # # testing object end
+
 
     try:
         json.loads(json.dumps(package))

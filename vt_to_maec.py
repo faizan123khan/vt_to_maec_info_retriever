@@ -32,7 +32,7 @@ Usage: python vt_to_maec.py [--hash] input output
 
 #!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!
 # Before you can use this script, you must supply a VirusTotal API key
-API_KEY = "REPLACE THIS STRING WITH AN API KEY FROM  https://www.virustotal.com"
+API_KEY = "7a11ef9031accd2ab410aae42525bcfc0d6b6014eea91920a0481dfbc2be4648"
 #!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!
 
 import argparse
@@ -52,6 +52,7 @@ parser.add_argument("input", help="the MD5 hash or path of the input binary file
 parser.add_argument("output", help="the name of the file to which the MAEC JSON output will be written")
 parser.add_argument("--md5", "--hash", help="indicates input is an MD5 hash of the file to be fetched and analyzed", action="store_true", default=False)
 parser.add_argument("--verbose", "-v", help="enable verbose error output mode", action="store_true", default=False)
+#  parser.add_argument("&allinfo=1",  help="give all information of malware")
 args = parser.parse_args()
 
 
@@ -71,4 +72,4 @@ except vtp.APIKeyException as ex:
 with open(args.output, 'w') as fp:
     json.dump(package_result, fp, indent=4)
 
-print "Wrote output to " + args.output
+print("Wrote output to " + args.output)

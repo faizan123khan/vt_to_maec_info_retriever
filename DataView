@@ -1,0 +1,22 @@
+import json
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Open JSON file and Read it
+with open('cc910328e735e933bd9e27d2ca0b1c64.json') as f:
+    Data = json.loads(f.read())
+
+# Get Attributes from JSON
+observable_objects = Data['behaviour-v1']
+Index = observable_objects['0']
+extensions = Index['network']
+# x_maec_avclass = extensions['http']
+
+# Load Data into Dataframe
+# df = pd.DataFrame(x_maec_avclass)
+
+# Plot Dataframe to Matplotlib
+plt.bar(df['av_name'], df['av_engine_version'], label='MD5 data Visualized')
+
+# Show Plot
+plt.show()

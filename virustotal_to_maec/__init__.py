@@ -15,7 +15,7 @@ MAEC packages
 
 import hashlib
 import json
-import virustotal_maec_packager as vtpack
+import virustotal_to_maec.virustotal_maec_packager as vtpack
 
 
 __version__ = "0.11"
